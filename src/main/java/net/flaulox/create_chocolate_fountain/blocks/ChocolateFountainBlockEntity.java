@@ -63,7 +63,6 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
     @Override
     public void tick() {
         super.tick();
-        System.out.println("test");
         if (level == null || level.isClientSide) return;
         BlockPos pos = getBlockPos();
         List<Player> players = level.getEntitiesOfClass(Player.class,
