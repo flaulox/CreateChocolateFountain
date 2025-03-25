@@ -127,7 +127,7 @@ dependencies {
 
     runtimeOnly("mezz.jei:jei-${mc_version}-neoforge:${jei_version}")
 
-    //implementation("curse.maven:create-dreams-desires-864781:6282649")
+
 
 
 

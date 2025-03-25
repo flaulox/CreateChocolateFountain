@@ -1,10 +1,8 @@
 package net.flaulox.create_chocolate_fountain.blocks;
 
-import com.simibubi.create.AllBlockEntityTypes;
-import com.simibubi.create.content.fluids.hosePulley.HosePulleyBlockEntity;
 import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
-import net.flaulox.create_chocolate_fountain.register.CreateChocolateFountainBlockEntityTypes;
+import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlockEntityTypes;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;

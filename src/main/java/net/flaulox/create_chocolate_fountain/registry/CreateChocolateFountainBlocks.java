@@ -1,19 +1,13 @@
-package net.flaulox.create_chocolate_fountain.register;
+package net.flaulox.create_chocolate_fountain.registry;
 
-import com.simibubi.create.content.fluids.hosePulley.HosePulleyBlock;
 import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.SharedProperties;
-import com.simibubi.create.infrastructure.config.CStress;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
 import static com.simibubi.create.foundation.data.ModelGen.customItemModel;
 import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
-import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
 import static net.flaulox.create_chocolate_fountain.Create_chocolate_fountain.CREATE_CHOCOLATE_FOUNTAIN_REGISTRATE;
 
 @SuppressWarnings({"removal", "unused"})
