@@ -7,7 +7,6 @@ import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock;
 import net.minecraft.world.level.material.MapColor;
 
 import static com.simibubi.create.foundation.data.ModelGen.customItemModel;
-import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
 import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
 import static net.flaulox.create_chocolate_fountain.Create_chocolate_fountain.CREATE_CHOCOLATE_FOUNTAIN_REGISTRATE;
 

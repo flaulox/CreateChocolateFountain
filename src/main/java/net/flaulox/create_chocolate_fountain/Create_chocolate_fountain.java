@@ -4,8 +4,12 @@ import com.mojang.logging.LogUtils;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
+import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
 import net.createmod.catnip.lang.FontHelper;
+import net.createmod.ponder.foundation.PonderIndex;
 import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlockEntity;
+import net.flaulox.create_chocolate_fountain.ponder.CreateChocolateFountainPonderPlugin;
+import net.flaulox.create_chocolate_fountain.ponder.CreateChocolateFountainPonderScenes;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlockEntityTypes;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlocks;
 import net.minecraft.client.Minecraft;
@@ -58,6 +62,7 @@ public class Create_chocolate_fountain
 
 
 
+
         NeoForge.EVENT_BUS.register(this);
 
 
@@ -100,6 +105,7 @@ public class Create_chocolate_fountain
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+            PonderIndex.addPlugin(new CreateChocolateFountainPonderPlugin());
         }
     }
 
