@@ -1,4 +1,5 @@
 {
+  "itemGroup.create_chocolate_fountain.base": "Create Chocolate Fountain",
   "block.create_chocolate_fountain.chocolate_fountain": "Chocolate Fountain",
   "create_chocolate_fountain.ponder.chocolate_fountain.header": "Setting up Chocolate Fountains",
   "create_chocolate_fountain.ponder.chocolate_fountain.text_1": "Chocolate Fountains can be supplied with chocolate from the bottom",

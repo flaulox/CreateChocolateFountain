@@ -12,6 +12,7 @@ import net.flaulox.create_chocolate_fountain.ponder.CreateChocolateFountainPonde
 import net.flaulox.create_chocolate_fountain.ponder.CreateChocolateFountainPonderScenes;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlockEntityTypes;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlocks;
+import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainCreativeModeTab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
@@ -59,6 +60,7 @@ public class Create_chocolate_fountain
 
         CreateChocolateFountainBlocks.register();
         CreateChocolateFountainBlockEntityTypes.register();
+        CreateChocolateFountainCreativeModeTab.register(modEventBus);
 
 
 
