@@ -82,6 +82,7 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
         super.tick();
         if (level == null || level.isClientSide) return;
         BlockPos pos = getBlockPos();
+        if (level.hasNeighborSignal(pos)) return;
         List<Player> players = level.getEntitiesOfClass(Player.class,
                 new net.minecraft.world.phys.AABB(
                         pos.getX() - range, pos.getY() - range, pos.getZ() - range,
