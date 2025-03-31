@@ -127,7 +127,7 @@ public class ChocolateFountainScenes {
         CreateSceneBuilder scene = new CreateSceneBuilder(builder);
         scene.title("chocolate_fountain_range", "The Chocolate Fountain in Action");
         scene.configureBasePlate(0, 0, 21);
-        scene.scaleSceneView(0.5f);
+        scene.scaleSceneView(0.4f);
         scene.showBasePlate();
 
 
