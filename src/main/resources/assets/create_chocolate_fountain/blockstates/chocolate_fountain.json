@@ -1,0 +1,134 @@
+{
+  "variants": {
+    "facing=east,powered=false,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom",
+      "y": 90
+    },
+    "facing=north,powered=false,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom"
+    },
+    "facing=south,powered=false,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom",
+      "y": 180
+    },
+    "facing=west,powered=false,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom",
+      "y": 270
+    },
+
+    "facing=east,powered=false,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom",
+      "y": 90
+    },
+    "facing=north,powered=false,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom"
+    },
+    "facing=south,powered=false,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom",
+      "y": 180
+    },
+    "facing=west,powered=false,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom",
+      "y": 270
+    },
+
+    "facing=east,powered=true,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off",
+      "y": 90
+    },
+    "facing=north,powered=true,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off"
+    },
+    "facing=south,powered=true,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off",
+      "y": 180
+    },
+    "facing=west,powered=true,running=true,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off",
+      "y": 270
+    },
+
+    "facing=east,powered=true,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off",
+      "y": 90
+    },
+    "facing=north,powered=true,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off"
+    },
+    "facing=south,powered=true,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off",
+      "y": 180
+    },
+    "facing=west,powered=true,running=false,half=bottom": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_bottom_off",
+      "y": 270
+    },
+
+
+
+
+    "facing=east,powered=true,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 90
+    },
+    "facing=north,powered=true,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top"
+    },
+    "facing=south,powered=true,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 180
+    },
+    "facing=west,powered=true,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 270
+    },
+
+    "facing=east,powered=false,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 90
+    },
+    "facing=north,powered=false,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top"
+    },
+    "facing=south,powered=false,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 180
+    },
+    "facing=west,powered=false,running=false,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 270
+    },
+
+    "facing=east,powered=false,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top_running",
+      "y": 90
+    },
+    "facing=north,powered=false,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top_running"
+    },
+    "facing=south,powered=false,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top_running",
+      "y": 180
+    },
+    "facing=west,powered=false,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top_running",
+      "y": 270
+    },
+
+    "facing=east,powered=true,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 90
+    },
+    "facing=north,powered=true,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top"
+    },
+    "facing=south,powered=true,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 180
+    },
+    "facing=west,powered=true,running=true,half=top": {
+      "model": "create_chocolate_fountain:block/chocolate_fountain/chocolate_fountain_top",
+      "y": 270
+    }
+  }
+}
