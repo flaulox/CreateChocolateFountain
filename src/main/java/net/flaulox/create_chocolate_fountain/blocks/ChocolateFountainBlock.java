@@ -138,7 +138,7 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
 
     @Override
     public Direction.Axis getRotationAxis(BlockState state) {
-        return null;
+        return state.getValue(BlockStateProperties.HORIZONTAL_FACING).getAxis();
     }
 
     @Override
