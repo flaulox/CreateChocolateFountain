@@ -43,14 +43,14 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
-
-        chocolateFountainRange = CHOCOLATE_FOUNTAIN_RANGE.get();
-        chocolateFountainTankCapacity = CHOCOLATE_FOUNTAIN_TANK_CAPACITY.get();
-        chocolateFountainConsumedPerUsage = CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE.get();
-        chocolateFountainCooldown = CHOCOLATE_FOUNTAIN_COOLDOWN.get();
-        chocolateFountainFoodAmount = CHOCOLATE_FOUNTAIN_FOOD_AMOUNT.get();
-        chocolateFountainSaturationAmount = CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT.get().floatValue();
-
+        if (event instanceof ModConfigEvent.Loading || event instanceof ModConfigEvent.Reloading) {
+            chocolateFountainRange = CHOCOLATE_FOUNTAIN_RANGE.get();
+            chocolateFountainTankCapacity = CHOCOLATE_FOUNTAIN_TANK_CAPACITY.get();
+            chocolateFountainConsumedPerUsage = CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE.get();
+            chocolateFountainCooldown = CHOCOLATE_FOUNTAIN_COOLDOWN.get();
+            chocolateFountainFoodAmount = CHOCOLATE_FOUNTAIN_FOOD_AMOUNT.get();
+            chocolateFountainSaturationAmount = CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT.get().floatValue();
+        }
 
 
     }
