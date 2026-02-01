@@ -1,22 +1,23 @@
 package net.flaulox.create_chocolate_fountain;
 
-import com.mojang.logging.LogUtils;
+import com.simibubi.create.api.contraption.BlockMovementChecks;
 import com.simibubi.create.foundation.item.ItemDescription;
-import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
-import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
 import net.createmod.catnip.lang.FontHelper;
 import net.createmod.ponder.foundation.PonderIndex;
+import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock;
 import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlockEntity;
 import net.flaulox.create_chocolate_fountain.ponder.CreateChocolateFountainPonderPlugin;
-import net.flaulox.create_chocolate_fountain.ponder.CreateChocolateFountainPonderScenes;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlockEntityTypes;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlocks;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainCreativeModeTab;
-import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,100 +27,86 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Create_chocolate_fountain.MODID)
-public class Create_chocolate_fountain
-{
-    // Define mod id in a common place for everything to reference
-    public static final String MODID = "create_chocolate_fountain";
-    // Directly reference a slf4j logger
-    private static final Logger LOGGER = LogUtils.getLogger();
+public class Create_chocolate_fountain {
 
-    public static final CreateChocolateFountainRegistrate CREATE_CHOCOLATE_FOUNTAIN_REGISTRATE = CreateChocolateFountainRegistrate.create(MODID)
+    public static final String MODID = "create_chocolate_fountain";
+    public static final CreateChocolateFountainRegistrate REGISTRATE = CreateChocolateFountainRegistrate.create(MODID)
             .defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
 
     static {
-        CREATE_CHOCOLATE_FOUNTAIN_REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
-                .andThen(TooltipModifier.mapNull(create(item))));
+        REGISTRATE.setTooltipModifierFactory(item ->
+                new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                        .andThen(TooltipModifier.mapNull(null)));
     }
 
+    // Initialization
 
-    // The constructor for the mod class is the first code that is run when your mod is loaded.
-    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Create_chocolate_fountain(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
-
-        CREATE_CHOCOLATE_FOUNTAIN_REGISTRATE.registerEventListeners(modEventBus);
+        REGISTRATE.registerEventListeners(modEventBus);
 
         CreateChocolateFountainBlocks.register();
         CreateChocolateFountainBlockEntityTypes.register();
         CreateChocolateFountainCreativeModeTab.register(modEventBus);
 
-
-
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
-
-        NeoForge.EVENT_BUS.register(this);
-
-
-
-
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {}
-
-
-    private void addCreative(BuildCreativeModeTabContentsEvent event)
-    {
-
+    public static CreateChocolateFountainRegistrate registrate() {
+        return REGISTRATE;
     }
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event)
-    {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
-    }
+    // Event Handlers
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    public static class ClientModEvents {
+
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            // Some client setup code
-            LOGGER.info("HELLO FROM CLIENT SETUP");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        public static void onClientSetup(FMLClientSetupEvent event) {
             PonderIndex.addPlugin(new CreateChocolateFountainPonderPlugin());
         }
     }
 
-    @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = MODID)
     public static class ModBusEvents {
-        @net.neoforged.bus.api.SubscribeEvent
-        public static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent event) {
+
+        @SubscribeEvent
+        public static void commonSetup(FMLCommonSetupEvent event) {
+            event.enqueueWork(() -> BlockMovementChecks.registerAttachedCheck(Create_chocolate_fountain::checkChocolateFountainMovement));
+        }
+
+        @SubscribeEvent
+        public static void registerCapabilities(RegisterCapabilitiesEvent event) {
             ChocolateFountainBlockEntity.registerCapabilities(event);
         }
     }
 
+    // Contraption Movement Logic
 
-    public static CreateChocolateFountainRegistrate registrate() {
+    private static BlockMovementChecks.CheckResult checkChocolateFountainMovement(
+            BlockState state,
+            LevelAccessor world,
+            BlockPos pos,
+            Direction direction) {
 
-        return CREATE_CHOCOLATE_FOUNTAIN_REGISTRATE;
+        if (!(state.getBlock() instanceof ChocolateFountainBlock))
+            return BlockMovementChecks.CheckResult.PASS;
+
+        if (!state.hasProperty(ChocolateFountainBlock.HALF))
+            return BlockMovementChecks.CheckResult.PASS;
+
+        if (direction.getAxis() != Direction.Axis.Y)
+            return BlockMovementChecks.CheckResult.FAIL;
+
+        DoubleBlockHalf half = state.getValue(ChocolateFountainBlock.HALF);
+        if (half == DoubleBlockHalf.LOWER && direction == Direction.UP)
+            return BlockMovementChecks.CheckResult.SUCCESS;
+
+        if (direction == Direction.DOWN)
+            return BlockMovementChecks.CheckResult.SUCCESS;
+
+        return BlockMovementChecks.CheckResult.FAIL;
     }
-
-    @Nullable
-    public static KineticStats create(Item item) {
-        return null;
-    }
-
 }

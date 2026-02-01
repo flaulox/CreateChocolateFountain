@@ -1,19 +1,12 @@
 package net.flaulox.create_chocolate_fountain;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-
-@EventBusSubscriber(modid = Create_chocolate_fountain.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Create_chocolate_fountain.MODID)
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -43,15 +36,16 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
+        if (event.getConfig().getSpec() != SPEC)
+            return;
 
-        chocolateFountainRange = CHOCOLATE_FOUNTAIN_RANGE.get();
-        chocolateFountainTankCapacity = CHOCOLATE_FOUNTAIN_TANK_CAPACITY.get();
-        chocolateFountainConsumedPerUsage = CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE.get();
-        chocolateFountainCooldown = CHOCOLATE_FOUNTAIN_COOLDOWN.get();
-        chocolateFountainFoodAmount = CHOCOLATE_FOUNTAIN_FOOD_AMOUNT.get();
-        chocolateFountainSaturationAmount = CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT.get().floatValue();
-
-
-
+        if (event instanceof ModConfigEvent.Loading) {
+            chocolateFountainRange = CHOCOLATE_FOUNTAIN_RANGE.get();
+            chocolateFountainTankCapacity = CHOCOLATE_FOUNTAIN_TANK_CAPACITY.get();
+            chocolateFountainConsumedPerUsage = CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE.get();
+            chocolateFountainCooldown = CHOCOLATE_FOUNTAIN_COOLDOWN.get();
+            chocolateFountainFoodAmount = CHOCOLATE_FOUNTAIN_FOOD_AMOUNT.get();
+            chocolateFountainSaturationAmount = CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT.get().floatValue();
+        }
     }
 }

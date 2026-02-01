@@ -1,8 +1,5 @@
 package net.flaulox.create_chocolate_fountain.ponder;
 
-import com.simibubi.create.AllBlocks;
-import com.simibubi.create.infrastructure.ponder.AllCreatePonderTags;
-import com.simibubi.create.infrastructure.ponder.scenes.KineticsScenes;
 import com.tterrag.registrate.util.entry.ItemProviderEntry;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
@@ -15,7 +12,7 @@ public class CreateChocolateFountainPonderScenes {
         PonderSceneRegistrationHelper<ItemProviderEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
 
         HELPER.forComponents(CreateChocolateFountainBlocks.CHOCOLATE_FOUNTAIN)
-                .addStoryBoard("chocolate_fountain/intro", ChocolateFountainScenes::intro, AllCreatePonderTags.FLUIDS)
+                .addStoryBoard("chocolate_fountain/intro", ChocolateFountainScenes::intro)
                 .addStoryBoard("chocolate_fountain/range", ChocolateFountainScenes::range);
     }
 }

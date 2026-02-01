@@ -3,177 +3,159 @@ package net.flaulox.create_chocolate_fountain.blocks;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.api.equipment.goggles.IProxyHoveringInformation;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import com.simibubi.create.content.kinetics.waterwheel.LargeWaterWheelBlock;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import net.flaulox.create_chocolate_fountain.Config;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.List;
 
-import net.minecraft.core.Direction;
-import net.neoforged.neoforge.capabilities.Capabilities;
-
 import static net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock.HALF;
 
 public class ChocolateFountainBlockEntity extends KineticBlockEntity implements IHaveGoggleInformation, IProxyHoveringInformation {
 
-
-    private static int range;
-    private static int tankCapacity;
-    private static int consumedPerUsage;
+    private SmartFluidTankBehaviour tank;
     private int cooldown;
-    private static int baseCooldown;
-    private static int foodAmount;
-    private static float saturationAmount;
-
-    SmartFluidTankBehaviour tank;
 
     public ChocolateFountainBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
     }
 
-
+    // Behaviours
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-        tank = SmartFluidTankBehaviour.single(this, tankCapacity);
+        tank = SmartFluidTankBehaviour.single(this, Config.chocolateFountainTankCapacity);
         tank.getPrimaryHandler().setValidator(fluidStack ->
-                fluidStack.getFluid().defaultFluidState().is(AllTags.commonFluidTag("chocolates"))
+                fluidStack.getFluid().defaultFluidState().is(AllTags.AllFluidTags.CHOCOLATE.tag)
         );
         behaviours.add(tank);
     }
+
+    // Capabilities
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
                 CreateChocolateFountainBlockEntityTypes.CHOCOLATE_FOUNTAIN.get(),
-                (be, context) -> {
-                    // Only allow input from the bottom
-                    if (context != Direction.DOWN) {
-                        return null;
-                    }
-
-                    return be.tank.getCapability();
-                }
+                (be, context) -> context == Direction.DOWN ? be.tank.getCapability() : null
         );
     }
 
-    @Override
-    public void onLoad() {
-        super.onLoad();
-        range = Config.chocolateFountainRange;
-        tankCapacity = Config.chocolateFountainTankCapacity;
-        consumedPerUsage = Config.chocolateFountainConsumedPerUsage;
-        cooldown = Config.chocolateFountainCooldown;
-        baseCooldown = Config.chocolateFountainCooldown;
-        foodAmount = Config.chocolateFountainFoodAmount;
-        saturationAmount = Config.chocolateFountainSaturationAmount;
-    }
+    // Tick Logic
 
     @Override
     public void tick() {
         super.tick();
 
-        if (level == null || level.isClientSide) return;
-
-        BlockPos pos = getBlockPos();
-
-        if (!stillValid(level, pos, getBlockState())) {
-            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+        if (level == null || level.isClientSide || !isLowerHalf())
             return;
-        }
 
-        if (getBlockState().getValue(HALF) == Half.TOP) return;
-        if (level.hasNeighborSignal(pos) || level.hasNeighborSignal(pos.above())) return;
+        if (isPowered())
+            return;
 
-        List<Player> players = level.getEntitiesOfClass(Player.class,
-                new net.minecraft.world.phys.AABB(
-                        pos.getX() - range, pos.getY() - range, pos.getZ() - range,
-                        pos.getX() + range, pos.getY() + range, pos.getZ() + range));
+        updateRunningState();
+        tickFeedingLogic();
+    }
 
+    private void updateRunningState() {
+        boolean hasFluid = tank.getCapability().getFluidInTank(0).getAmount() > 0;
+        BlockPos pos = getBlockPos();
+        
+        updateBlockRunningState(pos, hasFluid);
+        updateBlockRunningState(pos.above(), hasFluid);
+    }
 
-        if (tank.getCapability().getFluidInTank(0).getAmount() > 0) {
-            level.setBlock(pos, getBlockState().setValue(ChocolateFountainBlock.RUNNING, true), 3);
-            level.setBlock(pos.above(), level.getBlockState(pos.above()).setValue(ChocolateFountainBlock.RUNNING, true), 3);
-        } else {
-            level.setBlock(pos, getBlockState().setValue(ChocolateFountainBlock.RUNNING, false), 3);
-            level.setBlock(pos.above(), level.getBlockState(pos.above()).setValue(ChocolateFountainBlock.RUNNING, false), 3);
-        }
+    private void updateBlockRunningState(BlockPos pos, boolean running) {
+        BlockState state = level.getBlockState(pos);
+        if (state.hasProperty(ChocolateFountainBlock.RUNNING))
+            level.setBlock(pos, state.setValue(ChocolateFountainBlock.RUNNING, running), 3);
+    }
 
-        this.cooldown += 1;
-        if (this.cooldown >= baseCooldown) {
-            for (Player player : players) {
-                if (player.isCreative()) continue;
-                if (player.getFoodData().needsFood() && tank.getCapability().getFluidInTank(0).getAmount() >= consumedPerUsage) {
-                    player.getFoodData().eat(foodAmount, saturationAmount);
-                    level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 1.0f, 1.0f);
-                    level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.BLOCKS, 0.7f, 1.0f);
-                    tank.getCapability().drain(consumedPerUsage, IFluidHandler.FluidAction.EXECUTE);
-                    this.cooldown = 0;
-                }
+    private void tickFeedingLogic() {
+        cooldown++;
+        if (cooldown < Config.chocolateFountainCooldown)
+            return;
+
+        List<Player> players = getNearbyPlayers();
+        for (Player player : players) {
+            if (tryFeedPlayer(player)) {
+                cooldown = 0;
+                break;
             }
         }
     }
 
-    public boolean stillValid(BlockGetter level, BlockPos pos, BlockState state) {
-        if (state.getValue(HALF) == Half.TOP) {
-            if (level.getBlockState(pos.below()).getBlock() == state.getBlock() && level.getBlockState(pos.below()).getValue(HALF) == Half.BOTTOM) {
-                return true;
-            }
-        }
-        if (state.getValue(HALF) == Half.BOTTOM) {
-            if (level.getBlockState(pos.above()).getBlock() == state.getBlock() && level.getBlockState(pos.above()).getValue(HALF) == Half.TOP) {
-                return true;
-            }
-        }
-        return false;
+    private List<Player> getNearbyPlayers() {
+        BlockPos pos = getBlockPos();
+        int range = Config.chocolateFountainRange;
+        return level.getEntitiesOfClass(Player.class,
+                new AABB(pos.getX() - range, pos.getY() - range, pos.getZ() - range,
+                        pos.getX() + range + 1, pos.getY() + range + 1, pos.getZ() + range + 1));
     }
 
+    private boolean tryFeedPlayer(Player player) {
+        if (player.isCreative() || !player.getFoodData().needsFood())
+            return false;
 
+        int consumed = Config.chocolateFountainConsumedPerUsage;
+        if (tank.getCapability().getFluidInTank(0).getAmount() < consumed)
+            return false;
 
+        player.getFoodData().eat(Config.chocolateFountainFoodAmount, Config.chocolateFountainSaturationAmount);
+        playFeedingSounds(player);
+        tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
+        return true;
+    }
 
+    private void playFeedingSounds(Player player) {
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 1.0f, 1.0f);
+        level.playSound(null, getBlockPos(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
+                SoundSource.BLOCKS, 0.7f, 1.0f);
+    }
 
+    // Goggle Information
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        BlockState state = getBlockState();
-        BlockPos infoSourcePos = getInformationSource(level, worldPosition, state);
+        BlockPos infoSourcePos = getInformationSource(level, worldPosition, getBlockState());
         ChocolateFountainBlockEntity infoSourceBE = (ChocolateFountainBlockEntity) level.getBlockEntity(infoSourcePos);
 
-        if (infoSourceBE != null) {
+        if (infoSourceBE != null)
             return infoSourceBE.containedFluidTooltip(tooltip, isPlayerSneaking, infoSourceBE.tank.getCapability());
-        }
 
         return false;
     }
 
-
     @Override
     public BlockPos getInformationSource(Level level, BlockPos pos, BlockState state) {
-        if (state.getValue(HALF) == Half.TOP) {
-            return pos.below();
-        }
-        return pos;
+        return state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
     }
 
-}
+    // Helpers
 
+    private boolean isLowerHalf() {
+        return getBlockState().getValue(HALF) == DoubleBlockHalf.LOWER;
+    }
+
+    private boolean isPowered() {
+        BlockPos pos = getBlockPos();
+        return level.hasNeighborSignal(pos) || level.hasNeighborSignal(pos.above());
+    }
+}

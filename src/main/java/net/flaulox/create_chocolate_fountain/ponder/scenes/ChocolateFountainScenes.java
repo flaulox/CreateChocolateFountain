@@ -1,11 +1,8 @@
 package net.flaulox.create_chocolate_fountain.ponder.scenes;
 
 import com.simibubi.create.AllFluids;
-import com.simibubi.create.content.fluids.drain.ItemDrainBlockEntity;
 import com.simibubi.create.content.fluids.tank.FluidTankBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
-import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.element.WorldSectionElement;
 import net.createmod.ponder.api.scene.SceneBuilder;
@@ -14,11 +11,6 @@ import net.createmod.ponder.api.scene.Selection;
 import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.state.properties.Half;
-import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
