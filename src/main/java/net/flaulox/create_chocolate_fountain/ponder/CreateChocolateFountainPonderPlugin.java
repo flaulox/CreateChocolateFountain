@@ -23,7 +23,7 @@ public class CreateChocolateFountainPonderPlugin implements PonderPlugin {
 
     @Override
     public void registerTags(PonderTagRegistrationHelper<ResourceLocation> helper) {
-        PonderTagRegistrationHelper<RegistryEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+        PonderTagRegistrationHelper<RegistryEntry<?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
         HELPER.addToTag(AllCreatePonderTags.FLUIDS).add(CreateChocolateFountainBlocks.CHOCOLATE_FOUNTAIN);
     }
 }

@@ -18,16 +18,16 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Create_chocolate_fountain.MODID)
 public class Create_chocolate_fountain {
@@ -42,48 +42,37 @@ public class Create_chocolate_fountain {
                         .andThen(TooltipModifier.mapNull(null)));
     }
 
-    // Initialization
+    public Create_chocolate_fountain() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-    public Create_chocolate_fountain(IEventBus modEventBus, ModContainer modContainer) {
+        modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(ClientModEvents::onClientSetup);
         REGISTRATE.registerEventListeners(modEventBus);
+
+        MinecraftForge.EVENT_BUS.register(this);
 
         CreateChocolateFountainBlocks.register();
         CreateChocolateFountainBlockEntityTypes.register();
         CreateChocolateFountainCreativeModeTab.register(modEventBus);
 
-        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> BlockMovementChecks.registerAttachedCheck(Create_chocolate_fountain::checkChocolateFountainMovement));
     }
 
     public static CreateChocolateFountainRegistrate registrate() {
         return REGISTRATE;
     }
 
-    // Event Handlers
-
-    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
-
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             PonderIndex.addPlugin(new CreateChocolateFountainPonderPlugin());
         }
     }
-
-    @EventBusSubscriber(modid = MODID)
-    public static class ModBusEvents {
-
-        @SubscribeEvent
-        public static void commonSetup(FMLCommonSetupEvent event) {
-            event.enqueueWork(() -> BlockMovementChecks.registerAttachedCheck(Create_chocolate_fountain::checkChocolateFountainMovement));
-        }
-
-        @SubscribeEvent
-        public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-            ChocolateFountainBlockEntity.registerCapabilities(event);
-        }
-    }
-
-    // Contraption Movement Logic
 
     private static BlockMovementChecks.CheckResult checkChocolateFountainMovement(
             BlockState state,

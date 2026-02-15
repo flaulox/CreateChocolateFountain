@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class CreateChocolateFountainPonderScenes {
     public static void register(PonderSceneRegistrationHelper<ResourceLocation> helper) {
-        PonderSceneRegistrationHelper<ItemProviderEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+        PonderSceneRegistrationHelper<ItemProviderEntry<?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
 
         HELPER.forComponents(CreateChocolateFountainBlocks.CHOCOLATE_FOUNTAIN)
                 .addStoryBoard("chocolate_fountain/intro", ChocolateFountainScenes::intro)

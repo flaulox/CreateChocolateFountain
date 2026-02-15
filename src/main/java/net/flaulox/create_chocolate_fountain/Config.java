@@ -1,27 +1,27 @@
 package net.flaulox.create_chocolate_fountain;
 
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 
-@EventBusSubscriber(modid = Create_chocolate_fountain.MODID)
+@Mod.EventBusSubscriber(modid = Create_chocolate_fountain.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config {
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
 
 
-    private static final ModConfigSpec.IntValue CHOCOLATE_FOUNTAIN_RANGE = BUILDER.comment("Set the range of Chocolate Fountain (in Blocks)").defineInRange("chocolate_fountain_range", 10, 0, Integer.MAX_VALUE);
-    private static final ModConfigSpec.IntValue CHOCOLATE_FOUNTAIN_TANK_CAPACITY = BUILDER.comment("Set the internal Tank Capacity of the Chocolate Fountain (in mB)").defineInRange("chocolateFountainTankCapacity", 1000, 0, Integer.MAX_VALUE);
-    private static final ModConfigSpec.IntValue CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE = BUILDER.comment("Amount of Chocolate consumed when autofeeding the Player (in mB)").defineInRange("chocolateFountainConsumedPerUsage", 250, 0, Integer.MAX_VALUE);
-    private static final ModConfigSpec.IntValue CHOCOLATE_FOUNTAIN_COOLDOWN = BUILDER.comment("Time between possible feeding actions (in ticks)").defineInRange("chocolateFountainCooldown", 40, 1, Integer.MAX_VALUE);
-    private static final ModConfigSpec.IntValue CHOCOLATE_FOUNTAIN_FOOD_AMOUNT = BUILDER.comment("Amount of Food added to the Player)").defineInRange("chocolateFountainFoodAmount", 3, 0, 20);
-    private static final ModConfigSpec.DoubleValue CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT = BUILDER.comment("Amount of Saturation added to the Player").defineInRange("chocolateFountainSaturationAmount", 0.3, 0.0, 20.0 );
+    private static final ForgeConfigSpec.IntValue CHOCOLATE_FOUNTAIN_RANGE = BUILDER.comment("Set the range of Chocolate Fountain (in Blocks)").defineInRange("chocolate_fountain_range", 10, 0, Integer.MAX_VALUE);
+    private static final ForgeConfigSpec.IntValue CHOCOLATE_FOUNTAIN_TANK_CAPACITY = BUILDER.comment("Set the internal Tank Capacity of the Chocolate Fountain (in mB)").defineInRange("chocolateFountainTankCapacity", 1000, 0, Integer.MAX_VALUE);
+    private static final ForgeConfigSpec.IntValue CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE = BUILDER.comment("Amount of Chocolate consumed when autofeeding the Player (in mB)").defineInRange("chocolateFountainConsumedPerUsage", 250, 0, Integer.MAX_VALUE);
+    private static final ForgeConfigSpec.IntValue CHOCOLATE_FOUNTAIN_COOLDOWN = BUILDER.comment("Time between possible feeding actions (in ticks)").defineInRange("chocolateFountainCooldown", 40, 1, Integer.MAX_VALUE);
+    private static final ForgeConfigSpec.IntValue CHOCOLATE_FOUNTAIN_FOOD_AMOUNT = BUILDER.comment("Amount of Food added to the Player)").defineInRange("chocolateFountainFoodAmount", 3, 0, 20);
+    private static final ForgeConfigSpec.DoubleValue CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT = BUILDER.comment("Amount of Saturation added to the Player").defineInRange("chocolateFountainSaturationAmount", 0.3, 0.0, 20.0 );
 
 
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+    static final ForgeConfigSpec SPEC = BUILDER.build();
 
 
     public static int chocolateFountainRange;
@@ -39,13 +39,11 @@ public class Config {
         if (event.getConfig().getSpec() != SPEC)
             return;
 
-        if (event instanceof ModConfigEvent.Loading) {
-            chocolateFountainRange = CHOCOLATE_FOUNTAIN_RANGE.get();
-            chocolateFountainTankCapacity = CHOCOLATE_FOUNTAIN_TANK_CAPACITY.get();
-            chocolateFountainConsumedPerUsage = CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE.get();
-            chocolateFountainCooldown = CHOCOLATE_FOUNTAIN_COOLDOWN.get();
-            chocolateFountainFoodAmount = CHOCOLATE_FOUNTAIN_FOOD_AMOUNT.get();
-            chocolateFountainSaturationAmount = CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT.get().floatValue();
-        }
+        chocolateFountainRange = CHOCOLATE_FOUNTAIN_RANGE.get();
+        chocolateFountainTankCapacity = CHOCOLATE_FOUNTAIN_TANK_CAPACITY.get();
+        chocolateFountainConsumedPerUsage = CHOCOLATE_FOUNTAIN_CONSUMED_PER_USAGE.get();
+        chocolateFountainCooldown = CHOCOLATE_FOUNTAIN_COOLDOWN.get();
+        chocolateFountainFoodAmount = CHOCOLATE_FOUNTAIN_FOOD_AMOUNT.get();
+        chocolateFountainSaturationAmount = CHOCOLATE_FOUNTAIN_SATURATION_AMOUNT.get().floatValue();
     }
 }

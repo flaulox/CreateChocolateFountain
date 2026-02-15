@@ -19,9 +19,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -49,12 +52,11 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
 
     // Capabilities
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CreateChocolateFountainBlockEntityTypes.CHOCOLATE_FOUNTAIN.get(),
-                (be, context) -> context == Direction.DOWN ? be.tank.getCapability() : null
-        );
+    @Override
+    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER && side == Direction.DOWN)
+            return tank.getCapability().cast();
+        return super.getCapability(cap, side);
     }
 
     // Tick Logic
@@ -66,19 +68,19 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
         if (level == null || level.isClientSide || !isLowerHalf())
             return;
 
-        if (isPowered())
-            return;
-
         updateRunningState();
-        tickFeedingLogic();
+        
+        if (!isPowered())
+            tickFeedingLogic();
     }
 
     private void updateRunningState() {
-        boolean hasFluid = tank.getCapability().getFluidInTank(0).getAmount() > 0;
+        boolean hasFluid = tank.getCapability().resolve().map(handler -> handler.getFluidInTank(0).getAmount() > 0).orElse(false);
+        boolean shouldRun = hasFluid && !isPowered();
         BlockPos pos = getBlockPos();
         
-        updateBlockRunningState(pos, hasFluid);
-        updateBlockRunningState(pos.above(), hasFluid);
+        updateBlockRunningState(pos, shouldRun);
+        updateBlockRunningState(pos.above(), shouldRun);
     }
 
     private void updateBlockRunningState(BlockPos pos, boolean running) {
@@ -114,13 +116,15 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
             return false;
 
         int consumed = Config.chocolateFountainConsumedPerUsage;
-        if (tank.getCapability().getFluidInTank(0).getAmount() < consumed)
-            return false;
+        return tank.getCapability().resolve().map(handler -> {
+            if (handler.getFluidInTank(0).getAmount() < consumed)
+                return false;
 
-        player.getFoodData().eat(Config.chocolateFountainFoodAmount, Config.chocolateFountainSaturationAmount);
-        playFeedingSounds(player);
-        tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
-        return true;
+            player.getFoodData().eat(Config.chocolateFountainFoodAmount, Config.chocolateFountainSaturationAmount);
+            playFeedingSounds(player);
+            handler.drain(consumed, IFluidHandler.FluidAction.EXECUTE);
+            return true;
+        }).orElse(false);
     }
 
     private void playFeedingSounds(Player player) {
@@ -137,8 +141,12 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
         BlockPos infoSourcePos = getInformationSource(level, worldPosition, getBlockState());
         ChocolateFountainBlockEntity infoSourceBE = (ChocolateFountainBlockEntity) level.getBlockEntity(infoSourcePos);
 
-        if (infoSourceBE != null)
-            return infoSourceBE.containedFluidTooltip(tooltip, isPlayerSneaking, infoSourceBE.tank.getCapability());
+        if (infoSourceBE != null) {
+            LazyOptional<? extends IFluidHandler> capability = infoSourceBE.tank.getCapability();
+            return capability.resolve().map(handler -> 
+                infoSourceBE.containedFluidTooltip(tooltip, isPlayerSneaking, capability.cast())
+            ).orElse(false);
+        }
 
         return false;
     }

@@ -11,8 +11,8 @@ import net.createmod.ponder.api.scene.Selection;
 import net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class ChocolateFountainScenes {
     public static void intro(SceneBuilder builder, SceneBuildingUtil util) {

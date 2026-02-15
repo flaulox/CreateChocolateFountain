@@ -56,10 +56,11 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
         if (!level.getBlockState(pos.above()).canBeReplaced(context))
             return null;
 
+        boolean isPowered = level.hasNeighborSignal(pos) || level.hasNeighborSignal(pos.above());
         BlockState state = super.getStateForPlacement(context);
         return state == null ? null : state
                 .setValue(HALF, DoubleBlockHalf.LOWER)
-                .setValue(POWERED, false)
+                .setValue(POWERED, isPowered)
                 .setValue(RUNNING, false);
     }
 
@@ -122,8 +123,12 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
         BlockPos otherPos = isLower(state) ? pos.above() : pos.below();
         boolean isPowered = level.hasNeighborSignal(pos) || level.hasNeighborSignal(otherPos);
 
-        if (isPowered != state.getValue(POWERED))
+        if (isPowered != state.getValue(POWERED)) {
             level.setBlock(pos, state.setValue(POWERED, isPowered), 2);
+            BlockState otherState = level.getBlockState(otherPos);
+            if (otherState.is(this))
+                level.setBlock(otherPos, otherState.setValue(POWERED, isPowered), 2);
+        }
     }
 
     // Wrench Interaction
