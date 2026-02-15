@@ -1,0 +1,22 @@
+name: Publish Mod
+
+on:
+  workflow_dispatch:
+    inputs:
+      mod_version:
+        description: 'Mod version (e.g., 0.0.5)'
+        required: true
+        type: string
+
+jobs:
+  publish-mod:
+    permissions:
+      contents: write
+    uses: flaulox/WorkflowTemplates/.github/workflows/build-and-deploy.yml@main
+    with:
+      mod_version: ${{ inputs.mod_version }}
+      curseforge_id: '1232926'
+      modrinth_id: 'uAn01eey'
+    secrets:
+      CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
