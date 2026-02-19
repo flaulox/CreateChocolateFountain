@@ -1,5 +1,6 @@
 package net.flaulox.create_chocolate_fountain.blocks;
 
+import com.simibubi.create.AllFluids;
 import com.simibubi.create.AllTags;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.api.equipment.goggles.IProxyHoveringInformation;
@@ -7,23 +8,30 @@ import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import net.flaulox.create_chocolate_fountain.Config;
+import net.flaulox.create_chocolate_fountain.compat.ConfectioneryCompat;
+import net.flaulox.create_chocolate_fountain.compat.ThirstCompat;
 import net.flaulox.create_chocolate_fountain.registry.CreateChocolateFountainBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static net.flaulox.create_chocolate_fountain.blocks.ChocolateFountainBlock.HALF;
 
@@ -31,6 +39,21 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
 
     private SmartFluidTankBehaviour tank;
     private int cooldown;
+
+    private static final Map<Fluid, FluidFoodProperties> FLUID_PROPERTIES = new HashMap<>();
+
+    static {
+        FLUID_PROPERTIES.put(AllFluids.CHOCOLATE.getSource(), new FluidFoodProperties(
+            () -> Config.chocolateFountainFoodAmount,
+            () -> Config.chocolateFountainSaturationAmount
+        ));
+        FLUID_PROPERTIES.put(AllFluids.HONEY.getSource(), new FluidFoodProperties(
+            () -> Config.honeyFountainFoodAmount,
+            () -> Config.honeyFountainSaturationAmount
+        ));
+    }
+
+    private record FluidFoodProperties(java.util.function.IntSupplier food, java.util.function.Supplier<Float> saturation) {}
 
     public ChocolateFountainBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
@@ -41,9 +64,17 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         tank = SmartFluidTankBehaviour.single(this, Config.chocolateFountainTankCapacity);
-        tank.getPrimaryHandler().setValidator(fluidStack ->
-                fluidStack.getFluid().defaultFluidState().is(AllTags.AllFluidTags.CHOCOLATE.tag)
-        );
+        tank.getPrimaryHandler().setValidator(fluidStack -> {
+            if (fluidStack.getFluid().defaultFluidState().is(AllTags.AllFluidTags.CHOCOLATE.tag))
+                return true;
+            if (Config.autofeedHoney && fluidStack.getFluid().isSame(AllFluids.HONEY.get()))
+                return true;
+            if (Config.autofeedWater && fluidStack.getFluid().isSame(Fluids.WATER))
+                return true;
+            if (Config.autofeedConfectionery && ConfectioneryCompat.isConfectioneryFluid(fluidStack.getFluid()))
+                return true;
+            return false;
+        });
         behaviours.add(tank);
     }
 
@@ -74,17 +105,18 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
     }
 
     private void updateRunningState() {
-        boolean hasFluid = tank.getCapability().getFluidInTank(0).getAmount() > 0;
+        Fluid fluid = tank.getCapability().getFluidInTank(0).getFluid();
+        int fluidType = fluid.isSame(AllFluids.HONEY.getSource()) ? 1 : fluid.isSame(Fluids.WATER) ? 2 : 0;
         BlockPos pos = getBlockPos();
         
-        updateBlockRunningState(pos, hasFluid);
-        updateBlockRunningState(pos.above(), hasFluid);
+        updateBlockFluidType(pos, fluidType);
+        updateBlockFluidType(pos.above(), fluidType);
     }
 
-    private void updateBlockRunningState(BlockPos pos, boolean running) {
+    private void updateBlockFluidType(BlockPos pos, int fluidType) {
         BlockState state = level.getBlockState(pos);
-        if (state.hasProperty(ChocolateFountainBlock.RUNNING))
-            level.setBlock(pos, state.setValue(ChocolateFountainBlock.RUNNING, running), 3);
+        if (state.hasProperty(ChocolateFountainBlock.FLUID_TYPE))
+            level.setBlock(pos, state.setValue(ChocolateFountainBlock.FLUID_TYPE, fluidType), 3);
     }
 
     private void tickFeedingLogic() {
@@ -110,6 +142,22 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
     }
 
     private boolean tryFeedPlayer(Player player) {
+        Fluid fluid = tank.getCapability().getFluidInTank(0).getFluid();
+        
+        // Feed Water
+        if (fluid.isSame(Fluids.WATER) && ThirstCompat.isLoaded()) {
+            if (player.isCreative() || !ThirstCompat.needsThirst(player))
+                return false;
+            int consumed = Config.chocolateFountainConsumedPerUsage;
+            if (tank.getCapability().getFluidInTank(0).getAmount() < consumed)
+                return false;
+            ThirstCompat.addThirst(player, Config.waterThirstAmount, Config.waterQuenchedAmount, tank.getCapability().getFluidInTank(0).copy());
+            playDrinkingSounds(player);
+            tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
+            return true;
+        }
+
+        // Feed Food
         if (player.isCreative() || !player.getFoodData().needsFood())
             return false;
 
@@ -117,15 +165,41 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
         if (tank.getCapability().getFluidInTank(0).getAmount() < consumed)
             return false;
 
-        player.getFoodData().eat(Config.chocolateFountainFoodAmount, Config.chocolateFountainSaturationAmount);
-        playFeedingSounds(player);
-        tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
-        return true;
+        FluidFoodProperties props = FLUID_PROPERTIES.get(fluid);
+        if (props != null) {
+            player.getFoodData().eat(props.food.getAsInt(), props.saturation.get());
+            if (fluid.isSame(AllFluids.HONEY.getSource())) {
+                player.removeEffect(MobEffects.POISON);
+            }
+            playFeedingSounds(player);
+            tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
+            return true;
+        }
+
+        // Confectionery Fluids
+        if (ConfectioneryCompat.isConfectioneryFluid(fluid)) {
+            player.getFoodData().eat(Config.chocolateFountainFoodAmount, Config.chocolateFountainSaturationAmount);
+            ConfectioneryCompat.applyEffect(player, fluid);
+            playFeedingSounds(player);
+            tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
+            return true;
+        }
+
+        return false;
     }
 
     private void playFeedingSounds(Player player) {
+        Fluid fluid = tank.getCapability().getFluidInTank(0).getFluid();
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 1.0f, 1.0f);
+                fluid.isSame(AllFluids.HONEY.getSource()) ? SoundEvents.HONEY_DRINK : SoundEvents.GENERIC_EAT,
+                SoundSource.PLAYERS, 1.0f, 1.0f);
+        level.playSound(null, getBlockPos(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
+                SoundSource.BLOCKS, 0.7f, 1.0f);
+    }
+
+    private void playDrinkingSounds(Player player) {
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 1.0f, 1.0f);
         level.playSound(null, getBlockPos(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
                 SoundSource.BLOCKS, 0.7f, 1.0f);
     }
@@ -155,7 +229,25 @@ public class ChocolateFountainBlockEntity extends KineticBlockEntity implements 
     }
 
     private boolean isPowered() {
-        BlockPos pos = getBlockPos();
-        return level.hasNeighborSignal(pos) || level.hasNeighborSignal(pos.above());
+        return level.hasNeighborSignal(getBlockPos());
+    }
+
+    public SmartFluidTankBehaviour getTank() {
+        return tank;
+    }
+    
+    public boolean tryConsumeHoneyForBee() {
+        if (isPowered())
+            return false;
+        if (tank.getCapability().getFluidInTank(0).getFluid().isSame(AllFluids.HONEY.getSource())) {
+            int consumed = Config.beeCalmingConsumed;
+            if (tank.getCapability().getFluidInTank(0).getAmount() >= consumed) {
+                tank.getCapability().drain(consumed, IFluidHandler.FluidAction.EXECUTE);
+                level.playSound(null, getBlockPos(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
+                        SoundSource.BLOCKS, 0.7f, 1.0f);
+                return true;
+            }
+        }
+        return false;
     }
 }

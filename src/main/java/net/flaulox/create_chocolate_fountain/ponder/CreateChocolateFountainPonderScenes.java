@@ -13,6 +13,7 @@ public class CreateChocolateFountainPonderScenes {
 
         HELPER.forComponents(CreateChocolateFountainBlocks.CHOCOLATE_FOUNTAIN)
                 .addStoryBoard("chocolate_fountain/intro", ChocolateFountainScenes::intro)
-                .addStoryBoard("chocolate_fountain/range", ChocolateFountainScenes::range);
+                .addStoryBoard("chocolate_fountain/range", ChocolateFountainScenes::range)
+                .addStoryBoard("chocolate_fountain/bees", ChocolateFountainScenes::bees);
     }
 }

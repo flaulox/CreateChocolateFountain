@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.flaulox.create_chocolate_fountain.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "create_chocolate_fountain.refmap.json",
+  "mixins": [
+    "BeeCalmingMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

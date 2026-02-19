@@ -18,21 +18,21 @@ public class ChocolateFountainMovementBehaviour implements MovementBehaviour {
         if (info == null || !info.state().hasProperty(ChocolateFountainBlock.HALF))
             return;
 
-        syncRunningStateWithOtherHalf(context, info);
+        syncFluidTypeWithOtherHalf(context, info);
     }
 
-    private void syncRunningStateWithOtherHalf(MovementContext context, StructureBlockInfo info) {
+    private void syncFluidTypeWithOtherHalf(MovementContext context, StructureBlockInfo info) {
         BlockPos otherPos = getOtherHalfPos(context.localPos, info.state());
         StructureBlockInfo otherInfo = context.contraption.getBlocks().get(otherPos);
 
-        if (otherInfo == null || !otherInfo.state().hasProperty(ChocolateFountainBlock.RUNNING))
+        if (otherInfo == null || !otherInfo.state().hasProperty(ChocolateFountainBlock.FLUID_TYPE))
             return;
 
-        boolean running = info.state().getValue(ChocolateFountainBlock.RUNNING);
-        if (otherInfo.state().getValue(ChocolateFountainBlock.RUNNING) == running)
+        int fluidType = info.state().getValue(ChocolateFountainBlock.FLUID_TYPE);
+        if (otherInfo.state().getValue(ChocolateFountainBlock.FLUID_TYPE) == fluidType)
             return;
 
-        BlockState newState = otherInfo.state().setValue(ChocolateFountainBlock.RUNNING, running);
+        BlockState newState = otherInfo.state().setValue(ChocolateFountainBlock.FLUID_TYPE, fluidType);
         context.contraption.entity.setBlock(otherPos, new StructureBlockInfo(otherInfo.pos(), newState, otherInfo.nbt()));
     }
 

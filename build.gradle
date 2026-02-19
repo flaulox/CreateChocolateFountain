@@ -124,8 +124,10 @@ dependencies {
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
     compileOnly("mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}")
-
     runtimeOnly("mezz.jei:jei-${mc_version}-neoforge:${jei_version}")
+
+    implementation("curse.maven:thirst-was-taken-679270:7017923")
+    implementation("curse.maven:create-confectionery-531834:6495225")
 
 
 

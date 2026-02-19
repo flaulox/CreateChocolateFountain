@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -30,7 +31,7 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
 
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-    public static final BooleanProperty RUNNING = BooleanProperty.create("running");
+    public static final IntegerProperty FLUID_TYPE = IntegerProperty.create("fluid_type", 0, 2);
 
     public ChocolateFountainBlock(Properties properties) {
         super(properties);
@@ -41,7 +42,7 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(HALF, POWERED, RUNNING);
+        builder.add(HALF, POWERED, FLUID_TYPE);
     }
 
     // Placement
@@ -60,7 +61,7 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
         return state == null ? null : state
                 .setValue(HALF, DoubleBlockHalf.LOWER)
                 .setValue(POWERED, false)
-                .setValue(RUNNING, false);
+                .setValue(FLUID_TYPE, 0);
     }
 
     @Override
@@ -89,9 +90,6 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
         if (!isVerticalNeighbor)
             return state;
 
-        if (facingState.is(this) && facingState.getValue(HALF) != half)
-            return state.setValue(RUNNING, facingState.getValue(RUNNING));
-
         return state;
     }
 
@@ -116,11 +114,10 @@ public class ChocolateFountainBlock extends HorizontalKineticBlock implements IB
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        if (level.isClientSide)
+        if (level.isClientSide || !isLower(state))
             return;
 
-        BlockPos otherPos = isLower(state) ? pos.above() : pos.below();
-        boolean isPowered = level.hasNeighborSignal(pos) || level.hasNeighborSignal(otherPos);
+        boolean isPowered = level.hasNeighborSignal(pos);
 
         if (isPowered != state.getValue(POWERED))
             level.setBlock(pos, state.setValue(POWERED, isPowered), 2);

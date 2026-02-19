@@ -35,8 +35,8 @@ authors="${mod_authors}" #optional
 description='''${mod_description}'''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
-#[[mixins]]
-#config="${mod_id}.mixins.json"
+[[mixins]]
+config="${mod_id}.mixins.json"
 
 # The [[accessTransformers]] block allows you to declare where your AT file is.
 # If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg
@@ -76,6 +76,20 @@ side="BOTH"
 modId="create"
 type="required"
 versionRange="[6.0.3,6.1.0)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies."${mod_id}"]]
+modId="thirst"
+type="optional"
+versionRange="[1.21.1-2.1.5,1.21.1-2.2.0)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies."${mod_id}"]]
+modId="create_confectionery"
+type="optional"
+versionRange="[1.1.2,1.2.0)"
 ordering="NONE"
 side="BOTH"
 
